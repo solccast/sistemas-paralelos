@@ -20,8 +20,6 @@ El algoritmo `fib.c` resuelve la serie de Fibonacci, para un número N dado, uti
 |N| ITERATIVO | RECURSIVO |
 | --- | --- | --- |
 |10|0.0000015020|0.0000066996|
-|25||
-|40||
 |50|0.0000013113|537.5000690937|
 
 Es mucho más rápido el iterativo porque no hace llamados constantes a nuevas funciones con sus respectivos espacios de direcciones y una función nueva depende de la anterior. 
@@ -39,7 +37,7 @@ El algoritmo `funcion.c` resuelve, para un x dado, la siguiente sumatoria:
 El algoritmo compara dos alternativas de solución.  
 - ¿Cuál de las dos formas es más rápida? ¿Por qué?
 
-| $x$ |1era alt|2da alt|
+| $x$ |1era alternativa|2da alternativa|
 | -- | -- | --|
 |50 | <p>T. total: 1.5133619308</p> <p>T promedio: 0.0000000151</p>| <p>T. total: 8.8111691475</p> <p>T promedio: 0.0000000881</p>|
 |100|<p>T. total: 1.5253829956</p> <p>T promedio: 0.0000000153</p>|<p>T. total: 8.8100621700</p> <p>T promedio: 0.0000000881</p>|
