@@ -61,17 +61,19 @@ int main (int argc,char*argv[]){
     //printMatrixByRows(A, n); //Imprimimos la matriz A por filas
     //printMatrixByColumns(B, n); //Imprimimos la matriz B por columnas
 
+    timetick = dwalltime(); //Guardamos el tiempo de inicio 
+
     analizar_matriz(A, &minA, &maxA, &promA, n);
     analizar_matriz(B, &minB, &maxB, &promB, n);
     multiplicacion_matrices(A, B, RES_PARCIAL, n, 0); //Multiplicamos A y B, el resultado se almacena en C
-    printf("Estos son los extremos y promedios de las matrices: \n"
-           "A: min=%.1f, max=%.1f, prom=%.1f; "
-           "B: min=%.1f, max=%.1f, prom=%.1f\n",
-           minA, maxA, promA, minB, maxB, promB);
-    printMatrixByRows(RES_PARCIAL, n); //Imprimimos la matriz resultado de la multiplicacion de A y B por filas
+    // printf("Estos son los extremos y promedios de las matrices: \n"
+    //        "A: min=%.1f, max=%.1f, prom=%.1f; "
+    //        "B: min=%.1f, max=%.1f, prom=%.1f\n",
+    //        minA, maxA, promA, minB, maxB, promB);
+    //printMatrixByRows(RES_PARCIAL, n); //Imprimimos la matriz resultado de la multiplicacion de A y B por filas
     
     //Primera parte de la fórmula:
-    printf("maxA: %.2f, maxB: %.2f, minA: %.2f, minB: %.2f\n", maxA, maxB, minA, minB);
+    //printf("maxA: %.2f, maxB: %.2f, minA: %.2f, minB: %.2f\n", maxA, maxB, minA, minB);
 
     double num = (maxA * maxB) - (minA * minB);
     double den = promA * promB;
@@ -81,16 +83,20 @@ int main (int argc,char*argv[]){
     //printMatrixByRows(RES_PRIMERA_PARTE_FORM, n); //Imprimimos la matriz resultado de la multiplicacion de A y B por filas
 
     //Segunda parte de la fórmula
-    printf("\nMatriz C:\n");
-    printMatrixByRows(C, n); //Imprimimos la matriz C por filas
+    // printf("\nMatriz C:\n");
+    // printMatrixByRows(C, n); //Imprimimos la matriz C por filas
     multiplicacion_matrices(C, B, RES_PARCIAL_T, n, 1); //Multiplicamos C y B transpuesta, el resultado se almacena en RES_PARCIAL_T
-    printf("Matriz RESULTADO PARCIAL SEGUNDA PARTE:\n");  
-    printMatrixByRows(RES_PARCIAL_T, n); 
+    // printf("Matriz RESULTADO PARCIAL SEGUNDA PARTE:\n");  
+    // printMatrixByRows(RES_PARCIAL_T, n); 
 
     // //última parte de la fórmula
     suma_matrices(RES_PRIMERA_PARTE_FORM, RES_PARCIAL_T, R, n); //Sumamos la matriz RES_PRIMERA_PARTE_FORM y RES_PARCIAL_T, el resultado se almacena en R
-    printf("Matriz resultado:\n");
-    printMatrixByRows(R, n); //Imprimimos la matriz resultado por filas
+    timetick = dwalltime() - timetick; //Guardamos el tiempo de fin 
+
+    //printf("Matriz resultado:\n");
+    //printMatrixByRows(R, n); //Imprimimos la matriz resultado por filas
+
+    printf("Multiplicacion de matrices de %dx%d. Tiempo en segundos %f\n",n,n, timetick); //Imprimimos el tiempo de la multiplicacion de matrices
 
     //Liberar memoria
     free(A);
@@ -100,6 +106,7 @@ int main (int argc,char*argv[]){
     free(RES_PARCIAL);
     free(RES_PARCIAL_T);
     free(RES_PRIMERA_PARTE_FORM);
+    return (0);
 }
 
 void initvalmatfila(double *mat, int n, double val){
