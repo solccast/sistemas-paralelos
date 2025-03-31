@@ -126,6 +126,22 @@ Finalmente, compare los tiempos con respecto a la multiplicación de matrices op
 - ¿Cuál sería el tamaño de bloque óptimo para un determinado tamaño de matriz?  
 - ¿De qué depende el tamaño de bloque óptimo para un sistema?
 
+|Tamaño N | BS| tiempo de ejecución | rendimiento en GFlops
+| -- | -- | -- | -- |
+| 512 | 16 | 0.499625 | 0.537274 |
+| 512 | 32 | 0.507732 | 0.528695 | 
+| 512 | 64 | 0.533635 | 0.503032 | 
+| 512 | 128 | 0.530584 | 0.505925 | 
+| 1024 | 16 | 4.238621 | 0.506647 | 
+| 1024 | 32 | 4.178298 | 0.513961 | 
+| 1024 | 64 | 4.110498 | 0.522439 |
+| 1024 | 128 | 4.225884 | 0.508174 |
+| 2048 | 16 | 33.949284 | 0.506045 |
+| 2048 | 32 | 31.483798 | 0.545673 |
+| 2048 | 64 | 30.877268 | 0.556392 |
+| 2048 | 128 | 31.487156 | 0.545615 |
+
+
 ---
 
 ### 7. Multiplicación de matriz por matriz triangular
