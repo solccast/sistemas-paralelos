@@ -94,7 +94,7 @@ int main (int argc,char*argv[]){
     timetick = dwalltime() - timetick; //Guardamos el tiempo de fin 
 
     //printf("Matriz resultado:\n");
-    //printMatrixByRows(R, n); //Imprimimos la matriz resultado por filas
+    printMatrixByRows(R, n); //Imprimimos la matriz resultado por filas
 
     printf("Multiplicacion de matrices de %dx%d. Tiempo en segundos %f\n",n,n, timetick); //Imprimimos el tiempo de la multiplicacion de matrices
 
@@ -169,10 +169,10 @@ void multiplicacion_matrices(double *mat_a, double *mat_b, double *mat_res, int 
             double sum = 0.0;
             for (int k = 0; k < n; k++){
                 if (transpose == 1){
-                    printf("Multiplicando: %.1f * %.1f\n", mat_a[i*n + k], mat_b[k + j*n]);
+                    //printf("Multiplicando: %.1f * %.1f\n", mat_a[i*n + k], mat_b[k + j*n]);
                     sum += mat_a[i*n + k] * mat_b[k*n + j]; // Multiplicamos la fila i de A por la columna j de B transpuesta
                 } else {
-                    printf("Multiplicando: %.1f * %.1f\n", mat_a[i*n + k], mat_b[k*n + j]);
+                    //printf("Multiplicando: %.1f * %.1f\n", mat_a[i*n + k], mat_b[k*n + j]);
                     sum += mat_a[i*n + k] * mat_b[j*n + k]; 
                 }
             }
