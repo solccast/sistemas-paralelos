@@ -102,3 +102,27 @@ Comparación
 | 4096 | 2  | 1.614168    | 0.807084     |
 | 4096 | 4  | 2.767428    | 0.691857     |
 | 4096 | 8  | 3.323595    | 0.415449     |
+
+
+3. Desarrolle un algoritmo paralelo que cuente la cantidad de veces que un elemento X aparece dentro de un vector de N elementos enteros. Al finalizar, la cantidad de ocurrencias del elemento X debe quedar en una variable llamada ocurrencias. Para la sincronización emplee mutex-locks. Pruebe con diversos tamaños de N y T={2,4,8}. Analice el rendimiento.
+
+| N    | T  | Tiempo (s) |
+|------|----|------------|
+| 512  | 2  | 0.000000    |
+| 512  | 4  | 0.000000    |
+| 512  | 8  | 0.000000    |
+| 1024 | 2  | 0.000000    |
+| 1024 | 4  | 0.000000    |
+| 1024 | 8  | 0.000000    |
+| 2048 | 2  | 0.000000    |
+| 2048 | 4  | 0.000000    |
+| 2048 | 8  | 0.000000    |
+| 4096 | 2  | 0.000000    |
+| 4096 | 4  | 0.000000    |
+| 4096 | 8  | 0.000000    |
+
+
+| N    | T  | SpeedUp     | Eficiencia   |
+|------|----|-------------|--------------|
+
+4. . Desarrolle un algoritmo paralelo que calcule el valor promedio, mínimo y máximo de los números almacenados en un vector de tamaño N. Para la sincronización emplee semáforos. Pruebe con diversos tamaños de N y T={2,4,8}. Analice el rendimiento.
