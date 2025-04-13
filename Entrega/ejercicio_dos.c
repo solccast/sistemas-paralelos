@@ -15,7 +15,7 @@ void verificarResultado(double *M, int N);
 
 int main (int argc,char*argv[]){
 
-    double *A, *B, *C; //Matrices cuadradas de NxN con elementos de tipo double
+    double *A, *B, *C, *BT; //Matrices cuadradas de NxN con elementos de tipo double
     double *R; //Matriz resultado 
     double *RES_PARCIAL; //Matriz resultado de la multiplicacion de A y B
     double *RES_PARCIAL_T; //Matriz resultado de la multiplicacion de C y B transpuesta
@@ -57,17 +57,20 @@ int main (int argc,char*argv[]){
     R = (double *) malloc(n*n*sizeof(double)); //Reservamos memoria para R
     RES_PARCIAL = (double *) malloc(n*n*sizeof(double)); //Reservamos memoria para RES_PARCIAL
     RES_PARCIAL_T = (double *) malloc(n*n*sizeof(double)); //Reservamos memoria para RES_PARCIAL_T
-    
+    BT = (double *) malloc(n*n*sizeof(double)); //Reservamos memoria para BT
+
     cantidad_elementos_totales = n * n; 
 
+    double count = 0.0;
     for (int i = 0; i < n; i++){
         for (int j = 0; j < n; j++){
-            A[i*n + j] = 1.0; // Inicializamos A por fila
-            B[j*n + i] = 1.0; // Inicializamos B por columna
-            C[i*n + j] = 1.0; // Inicializamos C por fila
+            A[i*n + j] = count; // Inicializamos A por fila
+            B[j*n + i] = count; // Inicializamos B por columna
+            C[i*n + j] = count; // Inicializamos C por fila
             RES_PARCIAL[i*n + j]= 0.0; //Matriz donde se almacenará la primera parte de la fórmula 
             RES_PARCIAL_T[i*n + j]= 0.0; //Matriz donde se almacenará la segunda parte de la fórmula
             R[i*n + j] = 0.0; //Matriz resultado
+            count+= 1.0; //Incrementamos el valor de count para que cada elemento de la matriz sea diferente
         }
     }
 
@@ -143,6 +146,13 @@ int main (int argc,char*argv[]){
         }
     }    
 
+    // Trasponemos B 
+    for (i = 0; i < n; i++){
+          for (j = 0; j < n; j++){
+                BT[j*n + i] = B[i*n + j]; 
+          }
+     }
+
     // Multiplicación de matrices: C * B transpuesta
     for (i = 0; i < n; i+= tam_bloque){
         for (j = 0; j < n; j+= tam_bloque){
@@ -154,7 +164,8 @@ int main (int argc,char*argv[]){
                         desplazamiento_j = sub_j*n;
                         double sumaParcial = 0.0; // Inicializamos el valor actual en 0.0
                         for (sub_k = k; sub_k < k + tam_bloque; sub_k++){
-                            sumaParcial += C[desplazamiento_i + sub_k] * B[desplazamiento_j+ sub_k]; 
+                            //sumaParcial += C[desplazamiento_i + sub_k] * B[desplazamiento_j + sub_k]; //Se multiplica por B transpuesta 
+                            sumaParcial+= C[desplazamiento_i + sub_k] * BT[sub_k*n + sub_j]; //Se multiplica por B transpuesta
                         }
                         RES_PARCIAL_T[desplazamiento_i + sub_j] += sumaParcial; // Almacenamos el resultado más la suma de la primera parte 
                     }
@@ -163,7 +174,7 @@ int main (int argc,char*argv[]){
         }
     }
     for (int m = 0; m < cantidad_elementos_totales; m++){
-        R[m] = (escalar * RES_PARCIAL[m]) + RES_PARCIAL_T[m]; //Sumamos la matriz resultado de la primera parte con la segunda parte
+        R[m] = (escalar * RES_PARCIAL[m]) + RES_PARCIAL_T[m] ; //Sumamos la matriz resultado de la primera parte con la segunda parte
     }
     timetick = dwalltime() - timetick; //Guardamos el tiempo de fin 
 
@@ -171,11 +182,40 @@ int main (int argc,char*argv[]){
 
     verificarResultado(R, n); //Verificamos el resultado de la multiplicacion de matrices
 
+    printf("\n----------------------\n");
+
+    printf("\nVector A");
+    for(i = 0; i < cantidad_elementos_totales; i++){
+        printf("%f ", A[i]);
+    }
+    printf("\n----------------------\n");
+
+    printf("\nVector B");
+    for(i = 0; i < cantidad_elementos_totales; i++){
+        printf("%f ", B[i]);
+    }    
+
+    printf("\n----------------------\n");
+
+    printf("\nResultados de la multiplicacion de matrices:\n");
+    for (i = 0; i < cantidad_elementos_totales; i++){
+        printf("%f ", R[i]); //Imprimimos el resultado de la multiplicacion de matrices
+    }
+    printf("\n");
+
+    printf("\n----------------------\n");
+
+    printf("\nResultados de la multiplicacion de matrices con B transpuesta:\n");
+    for (i = 0; i < cantidad_elementos_totales; i++){
+        printf("%f ", RES_PARCIAL_T[i]); //Imprimimos el resultado de la multiplicacion de matrices
+    }
+
     //Liberar memoria
     free(A);
     free(B);
     free(C);
     free(R);
+    free(BT);
     free(RES_PARCIAL);
     free(RES_PARCIAL_T);
     return (0);
