@@ -126,3 +126,22 @@ Comparación
 |------|----|-------------|--------------|
 
 4. . Desarrolle un algoritmo paralelo que calcule el valor promedio, mínimo y máximo de los números almacenados en un vector de tamaño N. Para la sincronización emplee semáforos. Pruebe con diversos tamaños de N y T={2,4,8}. Analice el rendimiento.
+
+🔹 Tiempo (s) - Pthreads
+
+| N    | T  | Tiempo (s) |
+|------|----|------------|
+| 512  | 2  |  0.003694  |
+| 512  | 4  | 0.007493    |
+| 512  | 8  | 0.007384    |
+| 1024 | 2  |   0.007255  |
+| 1024 | 4  |   0.006399 |
+| 1024 | 8  |  0.018846 |
+| 2048 | 2  |    |
+| 2048 | 4  |    |
+| 2048 | 8  |    |
+| 4096 | 2  |  |
+| 4096 | 4  |   |
+| 4096 | 8  |    |
+
+> Una vez que aumenta N de forma muy significativa se reflejan la sventajas del uso de hilos. Con estos números pequeños siempre tendrá ventaja el secuencial pero para números que superen el millón (ejemplo) los hilos son hasta 5 veces más eficientes 

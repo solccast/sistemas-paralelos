@@ -2,12 +2,15 @@
 #include<stdlib.h>
 #include<time.h>
 #include<pthread.h> 
+#include<semaphore.h>
 
 double *A; 
 int N, T;
 int blocksize; 
-double min, max; 
-
+double min, max, promedio; 
+sem_t sem_min;
+sem_t sem_max;
+sem_t sem_promedio; 
 
 void * analizar_vector (void * ptr); 
 
@@ -39,7 +42,8 @@ int main(int argc, char*argv[]){
 
     //Inicializar el vector A 
     for (int i = 0; i < N; i++){
-        A[i] = 1.0;
+        //A[i] = 1.0;
+        A[i] = (double)i;
     }
 
     pthread_attr_t attr; // Atributos de los hilos
@@ -47,6 +51,14 @@ int main(int argc, char*argv[]){
     int ids[T]; // Arreglo de ids de hilos
     pthread_t threads[T]; // Arreglo de hilos
     blocksize = N / T; // Tamaño de bloque para cada hilo
+    min = A[0]; // Inicializa min con el primer elemento del vector
+    max = A[0]; // Inicializa max con el primer elemento del vector
+    promedio = 0.0; // Inicializa promedio en 0
+
+    sem_init(&sem_min, 0, 1); // Se inicializa el semáforo en 1 (disponible)
+    sem_init(&sem_max, 0, 1); // Se inicializa el semáforo en 1 (disponible)
+    sem_init(&sem_promedio, 0, 1); // Se inicializa el semáforo en 1 (disponible)
+
 
     pthread_attr_init(&attr);
 
@@ -63,18 +75,75 @@ int main(int argc, char*argv[]){
         pthread_join(threads[i], (void *) &status);
     }
 
+    promedio = promedio / N; // Calcula el promedio total
+    
     timetick = dwalltime() - timetick;
+    
+    printf("--------------------------\n");
     printf("Tiempo de ejecución: %f segundos\n", timetick);
+    printf("Valor mínimo: %f\n", min);
+    printf("Valor máximo: %f\n", max);
+    printf("Promedio: %f\n", promedio);
+    printf("--------------------------\n");
 
+    // Verifica el resultado
+    int check = 1; 
+    for (int i = 0; i < N; i++)
+        check = check && (max == (double)(N - 1)) && (min == 0.0) && (promedio == (double)(N - 1) / 2);
+
+    if (check)
+    {
+        printf("Calculo correcto\n");
+    }
+    else
+    {
+        printf("Calculo erroneo\n");
+    }
     
     free(A);
+    sem_destroy(&sem_min); 
+    sem_destroy(&sem_max); 
+    sem_destroy(&sem_promedio); 
+
+
     return 0;
 }
 
 void * analizar_vector (void * ptr){
     int id = *(int *)ptr; // ID del hilo
+    int i; 
+    int inicio = id * blocksize; // Índice de inicio del bloque
+    int fin = inicio + blocksize; // Índice de fin del bloque
+    double min_local = A[inicio]; // Inicializa min_local con el primer elemento del bloque
+    double max_local = A[inicio]; // Inicializa max_local con el primer elemento del bloque
+    double suma_local = 0.0; // Inicializa suma_local en 0
 
-    printf("Hilo %d: ", id);
+    for (i = inicio; i < fin; i++){
+        if (A[i] < min_local) {
+            min_local = A[i]; // Actualiza min_local si es menor
+        }
+        if (A[i] > max_local) {
+            max_local = A[i]; // Actualiza max_local si es mayor
+        }
+        suma_local += A[i]; // Suma los elementos del bloque
+    }
 
+    // Sección crítica para actualizar min, max y promedio  
+    sem_wait(&sem_min); 
+    if (min_local < min) {
+        min = min_local; // Actualiza min si es menor
+    }
+    sem_post(&sem_min);
+
+    sem_wait(&sem_max);
+    if (max_local > max) {
+        max = max_local; // Actualiza max si es mayor
+    }
+    sem_post(&sem_max);
+
+    sem_wait(&sem_promedio);
+    promedio += suma_local; // Suma los resultados locales al promedio
+    sem_post(&sem_promedio);
+     
     pthread_exit((void*)ptr);
 }
