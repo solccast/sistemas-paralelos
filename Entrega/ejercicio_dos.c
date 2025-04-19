@@ -55,35 +55,35 @@ int main (int argc,char*argv[]){
     B = (double *) malloc(n*n*sizeof(double)); //Reservamos memoria para B
     C = (double *) malloc(n*n*sizeof(double)); //Reservamos memoria para C
     R = (double *) malloc(n*n*sizeof(double)); //Reservamos memoria para R
+    BT = (double *) malloc(n*n*sizeof(double)); 
     RES_PARCIAL = (double *) malloc(n*n*sizeof(double)); //Reservamos memoria para RES_PARCIAL
     RES_PARCIAL_T = (double *) malloc(n*n*sizeof(double)); //Reservamos memoria para RES_PARCIAL_T
-    BT = (double *) malloc(n*n*sizeof(double)); //Reservamos memoria para BT
-
+    
     cantidad_elementos_totales = n * n; 
 
-    double count = 0.0;
     for (int i = 0; i < n; i++){
         for (int j = 0; j < n; j++){
-            A[i*n + j] = count; // Inicializamos A por fila
-            B[j*n + i] = count; // Inicializamos B por columna
-            C[i*n + j] = count; // Inicializamos C por fila
+            A[i*n + j] = 1.0; // Inicializamos A por fila
+            B[j*n + i] = 1.0; // Inicializamos B por columna
+            BT[i*n + j] = 1.0; // Inicializamos BT para después almacenar la transpuesta de B
+            C[i*n + j] = 1.0; // Inicializamos C por fila
             RES_PARCIAL[i*n + j]= 0.0; //Matriz donde se almacenará la primera parte de la fórmula 
             RES_PARCIAL_T[i*n + j]= 0.0; //Matriz donde se almacenará la segunda parte de la fórmula
             R[i*n + j] = 0.0; //Matriz resultado
-            count+= 1.0; //Incrementamos el valor de count para que cada elemento de la matriz sea diferente
         }
     }
-
-    timetick = dwalltime(); //Inicio del conteo 
-
-    //---- Calculo del conteo del tiempo de ejecución ----- //
-
-    // Recorrido de la matriz A
+    
     minA = A[0]; // Inicializamos el minimo en el primer elemento de la matriz
-    maxA = B[0]; // Inicializamos el maximo en el primer elemento de la matriz
+    maxA = A[0]; // Inicializamos el maximo en el primer elemento de la matriz
     promA = 0; 
-
-    //Posteriormente usaremos valorActual para evaluar la eficiencia 
+    minB = B[0]; // Inicializamos el minimo en el primer elemento de la matriz
+    maxB = B[0]; // Inicializamos el maximo en el primer elemento de la matriz
+    promB = 0.0;
+    
+    //---- Calculo del conteo del tiempo de ejecución ----- //
+    timetick = dwalltime(); //Inicio del conteo 
+    
+    // Recorrido de la matriz A
 
     for (i = 0; i < n; i++){
         for (j = 0; j < n; j++){
@@ -103,9 +103,6 @@ int main (int argc,char*argv[]){
 
 
     // Recorrido de la matriz B
-    minB = B[0]; // Inicializamos el minimo en el primer elemento de la matriz
-    maxB = B[0]; // Inicializamos el maximo en el primer elemento de la matriz
-    promB = 0.0;
 
     for (i = 0; i < n; i++){
         for (j = 0; j < n; j++){
@@ -135,9 +132,10 @@ int main (int argc,char*argv[]){
                 for (sub_i = i; sub_i < i + tam_bloque; sub_i++){
                     desplazamiento_i = sub_i*n; 
                     for (sub_j = j; sub_j < j + tam_bloque; sub_j++){
+                        desplazamiento_j = sub_j * n;
                         double sumaParcial = 0.0; // Inicializamos el valor actual en 0.0
                         for (sub_k = k; sub_k < k + tam_bloque; sub_k++){
-                            sumaParcial += A[desplazamiento_i + sub_k] * B[sub_k*n + sub_j]; 
+                            sumaParcial += A[desplazamiento_i + sub_k] * B[desplazamiento_j+sub_k];
                         }
                         RES_PARCIAL[desplazamiento_i + sub_j] += sumaParcial; // Guardamos el resultado en la matriz RES_PARCIAL 
                     }
@@ -146,12 +144,12 @@ int main (int argc,char*argv[]){
         }
     }    
 
-    // Trasponemos B 
-    for (i = 0; i < n; i++){
-          for (j = 0; j < n; j++){
-                BT[j*n + i] = B[i*n + j]; 
-          }
-     }
+    //Se traspone la matriz B a la matriz BT
+    for(i = 0; i<n; i++){
+        for(j = 0; j<n; j++){
+            BT[j*n+i] = B[i*n+j]; //Almacenamos la transpuesta de B en BT
+        }
+    }
 
     // Multiplicación de matrices: C * B transpuesta
     for (i = 0; i < n; i+= tam_bloque){
@@ -164,8 +162,7 @@ int main (int argc,char*argv[]){
                         desplazamiento_j = sub_j*n;
                         double sumaParcial = 0.0; // Inicializamos el valor actual en 0.0
                         for (sub_k = k; sub_k < k + tam_bloque; sub_k++){
-                            //sumaParcial += C[desplazamiento_i + sub_k] * B[desplazamiento_j + sub_k]; //Se multiplica por B transpuesta 
-                            sumaParcial+= C[desplazamiento_i + sub_k] * BT[sub_k*n + sub_j]; //Se multiplica por B transpuesta
+                            sumaParcial += C[desplazamiento_i + sub_k] * BT[desplazamiento_j+ sub_k]; 
                         }
                         RES_PARCIAL_T[desplazamiento_i + sub_j] += sumaParcial; // Almacenamos el resultado más la suma de la primera parte 
                     }
@@ -174,7 +171,7 @@ int main (int argc,char*argv[]){
         }
     }
     for (int m = 0; m < cantidad_elementos_totales; m++){
-        R[m] = (escalar * RES_PARCIAL[m]) + RES_PARCIAL_T[m] ; //Sumamos la matriz resultado de la primera parte con la segunda parte
+        R[m] = (escalar * RES_PARCIAL[m]) + RES_PARCIAL_T[m]; //Sumamos la matriz resultado de la primera parte con la segunda parte
     }
     timetick = dwalltime() - timetick; //Guardamos el tiempo de fin 
 
@@ -182,40 +179,11 @@ int main (int argc,char*argv[]){
 
     verificarResultado(R, n); //Verificamos el resultado de la multiplicacion de matrices
 
-    printf("\n----------------------\n");
-
-    printf("\nVector A");
-    for(i = 0; i < cantidad_elementos_totales; i++){
-        printf("%f ", A[i]);
-    }
-    printf("\n----------------------\n");
-
-    printf("\nVector B");
-    for(i = 0; i < cantidad_elementos_totales; i++){
-        printf("%f ", B[i]);
-    }    
-
-    printf("\n----------------------\n");
-
-    printf("\nResultados de la multiplicacion de matrices:\n");
-    for (i = 0; i < cantidad_elementos_totales; i++){
-        printf("%f ", R[i]); //Imprimimos el resultado de la multiplicacion de matrices
-    }
-    printf("\n");
-
-    printf("\n----------------------\n");
-
-    printf("\nResultados de la multiplicacion de matrices con B transpuesta:\n");
-    for (i = 0; i < cantidad_elementos_totales; i++){
-        printf("%f ", RES_PARCIAL_T[i]); //Imprimimos el resultado de la multiplicacion de matrices
-    }
-
     //Liberar memoria
     free(A);
     free(B);
     free(C);
     free(R);
-    free(BT);
     free(RES_PARCIAL);
     free(RES_PARCIAL_T);
     return (0);
@@ -225,16 +193,21 @@ void verificarResultado(double *R, int N) {
     int check=1;
     int i, j;
 
-    for(i=0;i<N;i++){
-        for(j=0;j<N;j++){
-            check=check&&(R[j*N+i]==N);
-         }
+    /* Check results (just in case...) */
+    for (i = 0; i < N; i++)
+    {
+        for (j = 0; j < N; j++)
+        {
+            if (R[i*N + j] != N)
+            {
+                printf("Error at %d, %d, value: %f\n", i, j, R[i*N + j]);
+                check = 0; // Error encontrado
+            }
+        }
     }
-
-    if(check){
-         printf("Multiplicacion de matrices resultado correcto\n");
-    }else{
-         printf("Multiplicacion de matrices resultado erroneo\n");
+    
+    if (check){
+        printf("Multiplicacion de matrices resultado correcto\n");
     }
 }
 // Fin del programa
