@@ -16,7 +16,7 @@ pthread_barrier_t barrier;
 
 
 double dwalltime();
-void * multiplicacion_bloques (double *a, double *b, double *c, int inicio, int fin);
+void * multiplicacion_bloques (double *a, double *b, double *c, int id,int inicio, int fin);
 void * calcular_formula (void * ptr);
 void blkmul(double *ablk, double *bblk, double *cblk);
 void verificarResultado(double *M, int N);
@@ -67,12 +67,17 @@ int main(int argc, char *argv[]){
     for (i = 0; i < N; i++) {
       for (int j = 0; j < N; j++) {
         A[i * N + j] = 1.0; // Inicializar la matriz A por filas
-        B[j * N + i] = 1.0; // Inicializar la matriz B por columnas
         BT[i*N + j] = 0.0; // Inicialización para que no quede basura
         C[i * N + j] = 1.0; // Inicializar la matriz C por filas
         RES_MATRIZ[i*N + j] = 0.0; // Inicializar la matriz resultante para que no quede basura
         CBT[i*N + j] = 0.0; // Inicializar la matriz resultado de C*B^T para que no quede basura
         R[i * N + j] = 0.0; // Inicializar la matriz resultante para que no quede basura
+      }
+    }
+
+    for (i = 0; i < N; i++) {
+      for (j = 0; j < N; j++) {
+        B[j*N + i] = 1.0; // Inicializar la matriz B por columnas
       }
     }
     
@@ -86,13 +91,13 @@ int main(int argc, char *argv[]){
     
     pthread_attr_init(&attr);
     
+
+    timetick = dwalltime();
     /*Creación de los hilos*/
     for (i = 0; i < T; i++){
       ids[i] = i;
       pthread_create(&threads[i], &attr, calcular_formula, &ids[i]);
     }
-    
-    timetick = dwalltime();
     
     for (i = 0; i < T; i++){
       pthread_join(threads[i], (void *) &status);
@@ -131,8 +136,7 @@ void * calcular_formula (void * ptr) {
     double local_minA = A[inicio];
     double local_maxA = A[inicio];
     double local_sumA = 0.0;
-    
-    
+        
     for (i = inicio; i < fin; i++) {
       for (j = 0; j < N; j++) {
         valorActual = A[i * N + j];
@@ -144,8 +148,8 @@ void * calcular_formula (void * ptr) {
           local_maxA = valorActual;
         }
       }
-    }
-    
+    } 
+
     // Actualizar los valores globales de A usando mutex
     pthread_mutex_lock(&variableA);
     if (local_minA < minA) {
@@ -165,7 +169,7 @@ void * calcular_formula (void * ptr) {
     
     for (i = inicio; i < fin; i++) {
       for (j = 0; j < N; j++) {    
-        valorActual = B[j * N + i];
+        valorActual = B[i * N + j];
         local_sumB += valorActual;
         if (valorActual < local_minB) {
           local_minB = valorActual;
@@ -174,7 +178,8 @@ void * calcular_formula (void * ptr) {
           local_maxB = valorActual;    
         }
       }
-    }
+    } 
+      
     
     // Actualizar los valores globales de B usando mutex
     pthread_mutex_lock(&variableB);
@@ -195,25 +200,23 @@ void * calcular_formula (void * ptr) {
       escalar = (maxA * maxB - minA * minB) / (promA * promB);
     } 
       
-      // Multiplicación de matrices
-      multiplicacion_bloques(A, B, RES_MATRIZ, inicio, fin); // Se llama a la función de multiplicación de matrices
-      
-      // Trasponemos la matriz B para la multiplicación 
-      if (id == 0) // Solo un hilo se ocupa de hacer la transposición
+    // Multiplicación de matrices
+    multiplicacion_bloques(A, B, RES_MATRIZ, id, inicio, fin); // Se llama a la función de multiplicación de matrices
+    
+    // Trasposición de la matriz B
+    for (i = inicio; i < fin; i++)
+    {
+      int desplazamiento_i = i*N;
+      for (j = 0; j < N; j++)
       {
-      for (i = 0; i < N; i++)
-      {
-        int desplazamiento_i = i*N;
-        for (j = 0; j < N; j++)
-        {
-          BT[j * N + i] = B[desplazamiento_i + j]; // Trasponemos la matriz B
-        }
+        BT[j * N + i] = B[desplazamiento_i + j]; // Trasponemos la matriz B
       }
     }
+
     
     pthread_barrier_wait(&barrier); // Para que los hilos calculen la multiplicación con BT ya traspuesta 
     
-    multiplicacion_bloques(C, BT, CBT, inicio, fin); // Se llama a la función de multiplicación de matrices 
+    multiplicacion_bloques(C, BT, CBT, id, inicio, fin); // Se llama a la función de multiplicación de matrices 
     
     //Realizamos la suma de matrices y multiplicamos por el escalar
     for (i = inicio; i < fin; i++)
@@ -228,9 +231,9 @@ void * calcular_formula (void * ptr) {
     pthread_exit((void*)ptr);
   }    
   
-  void * multiplicacion_bloques (double *a, double *b, double *c, int inicio, int fin) {
+  void * multiplicacion_bloques (double *a, double *b, double *c, int id, int inicio, int fin) {
     int i, j, k, desplazamiento_i, desplazamiento_j;
-    
+
     for (i = inicio; i < fin; i += TAM_BLOQUE)
     {
       desplazamiento_i = i * N;
