@@ -192,14 +192,6 @@ void * calcular_formula (void * ptr) {
     promB += local_sumB; // Sumar el promedio local al global
     pthread_mutex_unlock(&variableB);
     
-    pthread_barrier_wait(&barrier); // Esperar a que todos los hilos terminen de calcular el mínimo, máximo y promedio
-    if (id == 0) //Solo un hilo se ocupa de hacer el cálculo del escalar
-    {
-      promA = promA / (cantidad_elementos_totales);
-      promB = promB / (cantidad_elementos_totales);
-      escalar = (maxA * maxB - minA * minB) / (promA * promB);
-    } 
-      
     // Multiplicación de matrices
     multiplicacion_bloques(A, B, RES_MATRIZ, id, inicio, fin); // Se llama a la función de multiplicación de matrices
     
@@ -212,9 +204,15 @@ void * calcular_formula (void * ptr) {
         BT[j * N + i] = B[desplazamiento_i + j]; // Trasponemos la matriz B
       }
     }
-
     
     pthread_barrier_wait(&barrier); // Para que los hilos calculen la multiplicación con BT ya traspuesta 
+    
+    if (id == 0) //Solo un hilo se ocupa de hacer el cálculo del escalar
+    {
+      promA = promA / (cantidad_elementos_totales);
+      promB = promB / (cantidad_elementos_totales);
+      escalar = (maxA * maxB - minA * minB) / (promA * promB);
+    } 
     
     multiplicacion_bloques(C, BT, CBT, id, inicio, fin); // Se llama a la función de multiplicación de matrices 
     

@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Trasposición de la matriz B a la matriz BT
-        #pragma omp for schedule(static) collapse(2)
+        #pragma omp for schedule(static) //collapse(2)
         for (i = 0; i < N; i++) {
             for (j = 0; j < N; j++) {
                 BT[j * N + i] = B[i * N + j];
@@ -118,7 +118,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Multiplicación A * B -> RES_PARCIAL
-        #pragma omp for nowait schedule(static) collapse(3)//nowait para que sigan ejecutando los hilos la sigiente multiplicación sin esperar a que terminen todos
+        #pragma omp for nowait schedule(static) //collapse(3)//nowait para que sigan ejecutando los hilos la sigiente multiplicación sin esperar a que terminen todos
         for (i = 0; i < N; i+= tam_bloque){
             for (j = 0; j < N; j+= tam_bloque){
                 for (k = 0; k < N; k+= tam_bloque){
@@ -139,7 +139,7 @@ int main(int argc, char *argv[]) {
        }    
 
         // Multiplicación C * BT -> RES_PARCIAL_T
-        #pragma omp for schedule(static) collapse(3)//Sin nowait porque se necesita que todos los hilos terminen para sumar los resultados
+        #pragma omp for schedule(static) //collapse(3)//Sin nowait porque se necesita que todos los hilos terminen para sumar los resultados
         for (i = 0; i < N; i+= tam_bloque){
             for (j = 0; j < N; j+= tam_bloque){
                 for (k = 0; k < N; k+= tam_bloque){
